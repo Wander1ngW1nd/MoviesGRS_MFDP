@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "moviesgrs-mfdp"
+version = "0.1.0"
+description = ""
+authors = ["Danil Islamov <danislamoff@gmail.com>"]
+readme = "README.md"
+packages = [{include = "moviesgrs_mfdp"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
