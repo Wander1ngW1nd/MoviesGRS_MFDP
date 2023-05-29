@@ -35,6 +35,26 @@ def calc_P_k(users_watch_history_test, group):
     return users_watch_history_test
 
 
+def calc_ndcg(users_watch_history_test, group):
+    users_watch_history_test[f'{group}_rec_ratings'] = (
+        users_watch_history_test
+        .apply(lambda x: get_rating(x, group), axis=1)
+    )
+
+    users_watch_history_test['pseudo_model_output'] = (
+        users_watch_history_test[f'{group}_rec']
+        .apply(lambda x: [(len(x) - i) for i in range(len(x))])
+    )
+
+    users_watch_history_test[f'{group}_NDCG_k'] = (
+        users_watch_history_test.apply(
+            lambda row: ndcg_score([row[f'{group}_rec_ratings']], [row['pseudo_model_output']]),
+            axis=1
+        )
+    )
+    return users_watch_history_test
+
+
 def evaluate_recommendations(users_watch_history_test):
     metrics_results = {}
 
@@ -55,23 +75,7 @@ def evaluate_recommendations(users_watch_history_test):
         
         metrics_results[metrics_name] = metrics_value
 
-        
-        users_watch_history_test[f'{group}_rec_ratings'] = (
-            users_watch_history_test
-            .apply(lambda x: get_rating(x, group), axis=1)
-        )
-
-        users_watch_history_test['pseudo_model_output'] = (
-            users_watch_history_test[f'{group}_rec']
-            .apply(lambda x: [(len(x) - i) for i in range(len(x))])
-        )
-
-        users_watch_history_test[f'{group}_NDCG_k'] = (
-            users_watch_history_test.apply(
-                lambda row: ndcg_score([row[f'{group}_rec_ratings']], [row['pseudo_model_output']]),
-                axis=1
-            )
-        )
+        users_watch_history_test = calc_ndcg(users_watch_history_test, group)
 
         metrics_name = f"NDCG_{group}"
         metrics_value = (
