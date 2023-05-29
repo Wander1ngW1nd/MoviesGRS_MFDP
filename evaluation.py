@@ -1,6 +1,26 @@
+from functools import reduce
 import numpy as np
 import pandas as pd
 from sklearn.metrics import ndcg_score
+
+
+def generate_recommendations(make_recommendations, users_watch_history_test, unwatched):
+    for group in [f'group{i}' for i in range(5, 8)]:
+        group_unwatched = (
+            unwatched
+            .groupby(by=group)
+            .agg({
+                'userId': list,
+                'unwatched': lambda x: np.array(reduce(np.intersect1d, x))
+            })
+            .reset_index()
+        )
+        group_unwatched['userId'] = group_unwatched.userId.apply(np.array)
+        group_unwatched[f'{group}_rec'] = group_unwatched.apply(make_recommendations, axis=1)
+        
+        users_watch_history_test = users_watch_history_test.merge(group_unwatched[[group, f'{group}_rec']], on=group)
+    
+    return users_watch_history_test
 
 
 def get_rating(row, group):
