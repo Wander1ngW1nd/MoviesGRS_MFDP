@@ -4,8 +4,8 @@ import pandas as pd
 from sklearn.metrics import ndcg_score
 
 
-def generate_recommendations(make_recommendations, users_watch_history_test, unwatched):
-    for group in [f'group{i}' for i in range(5, 8)]:
+def generate_recommendations(make_recommendations, users_watch_history_test, unwatched, groups_list):
+    for group in groups_list:
         group_unwatched = (
             unwatched
             .groupby(by=group)
@@ -75,10 +75,10 @@ def calc_ndcg(users_watch_history_test, group):
     return users_watch_history_test
 
 
-def evaluate_recommendations(users_watch_history_test):
+def evaluate_recommendations(users_watch_history_test, groups_list):
     metrics_results = {}
 
-    for group in [f'group{i}' for i in range(5, 8)]:
+    for group in groups_list:
         
         users_watch_history_test = get_relevance(users_watch_history_test, group)
 
