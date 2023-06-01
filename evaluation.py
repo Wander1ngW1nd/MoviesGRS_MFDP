@@ -4,10 +4,10 @@ import pandas as pd
 from sklearn.metrics import ndcg_score
 
 
-def generate_recommendations(make_recommendations, users_watch_history_test, unwatched, groups_list):
+def generate_recommendations(make_recommendations, recommender_data, groups_list):
     for group in groups_list:
         group_unwatched = (
-            unwatched
+            recommender_data
             .groupby(by=group)
             .agg({
                 'userId': list,
@@ -18,9 +18,9 @@ def generate_recommendations(make_recommendations, users_watch_history_test, unw
         group_unwatched['userId'] = group_unwatched.userId.apply(np.array)
         group_unwatched[f'{group}_rec'] = group_unwatched.apply(make_recommendations, axis=1)
         
-        users_watch_history_test = users_watch_history_test.merge(group_unwatched[[group, f'{group}_rec']], on=group)
+        recommender_data = recommender_data.merge(group_unwatched[[group, f'{group}_rec']], on=group)
     
-    return users_watch_history_test
+    return recommender_data
 
 
 def get_rating(row, group):
@@ -31,62 +31,64 @@ def get_rating(row, group):
     ])
 
 
-def get_relevance(users_watch_history_test, group):
-    users_watch_history_test[f'{group}_relevance'] = (
-        users_watch_history_test
+def get_relevance(recommender_data, group):
+    recommender_data[f'{group}_relevance'] = (
+        recommender_data
         .apply(lambda row: np.isin(row[f'{group}_rec'], row['movieId']).astype(int), axis=1)
     )
-    return users_watch_history_test
+    return recommender_data
 
 
-def calc_P_k(users_watch_history_test, group):
-    users_watch_history_test[f'{group}_P_k'] = (
-        users_watch_history_test[f'{group}_relevance']
+def calc_P_k(recommender_data, group):
+    recommender_data[f'{group}_P_k'] = (
+        recommender_data[f'{group}_relevance']
         .apply(lambda x: np.cumsum(x) * x / np.arange(1, len(x) + 1), 2)    
     )
-    users_watch_history_test[f'{group}_P_k'] = (
-        users_watch_history_test
+    recommender_data[f'{group}_P_k'] = (
+        recommender_data
         .apply(lambda row: row[f'{group}_P_k'].sum() / min(len(row['movieId']), len(row[f'{group}_rec'])), axis=1)
     )
-    users_watch_history_test[f'{group}_P_k'] = (
-        users_watch_history_test[f'{group}_P_k']
+    recommender_data[f'{group}_P_k'] = (
+        recommender_data[f'{group}_P_k']
         .apply(lambda x: np.around(x, 2))
     )
-    return users_watch_history_test
+    return recommender_data
 
 
-def calc_ndcg(users_watch_history_test, group):
-    users_watch_history_test[f'{group}_rec_ratings'] = (
-        users_watch_history_test
+def calc_ndcg(recommender_data, group):
+    recommender_data[f'{group}_rec_ratings'] = (
+        recommender_data
         .apply(lambda x: get_rating(x, group), axis=1)
     )
 
-    users_watch_history_test['pseudo_model_output'] = (
-        users_watch_history_test[f'{group}_rec']
-        .apply(lambda x: [(len(x) - i) for i in range(len(x))])
-    )
+    dcg = recommender_data[f'{group}_rec_ratings'].apply(
+        lambda ratings: np.sum([r / np.log2(2 + i) for i, r in enumerate(ratings)])
+    ).values
 
-    users_watch_history_test[f'{group}_NDCG_k'] = (
-        users_watch_history_test.apply(
-            lambda row: ndcg_score([row[f'{group}_rec_ratings']], [row['pseudo_model_output']]),
-            axis=1
+    idcg = 1e-8 + recommender_data[f'{group}_rec_ratings'].apply(
+        lambda ratings: np.sum(
+            [r / np.log2(2 + i) 
+             for i, r in enumerate(-np.sort(-ratings))]
         )
-    )
-    return users_watch_history_test
+    ).values
+
+    recommender_data[f'{group}_NDCG_k'] = dcg / idcg
+
+    return recommender_data
 
 
-def evaluate_recommendations(users_watch_history_test, groups_list):
+def evaluate_recommendations(recommender_data, groups_list):
     metrics_results = {}
 
     for group in groups_list:
         
-        users_watch_history_test = get_relevance(users_watch_history_test, group)
+        recommender_data = get_relevance(recommender_data, group)
 
-        users_watch_history_test = calc_P_k(users_watch_history_test, group)
+        recommender_data = calc_P_k(recommender_data, group)
 
         metrics_name = f"MAP_{group}"
         metrics_value = (
-            users_watch_history_test
+            recommender_data
             .groupby(by=group)
             [f'{group}_P_k']
             .mean()
@@ -95,11 +97,11 @@ def evaluate_recommendations(users_watch_history_test, groups_list):
         
         metrics_results[metrics_name] = metrics_value
 
-        users_watch_history_test = calc_ndcg(users_watch_history_test, group)
+        recommender_data = calc_ndcg(recommender_data, group)
 
         metrics_name = f"NDCG_{group}"
         metrics_value = (
-            users_watch_history_test
+            recommender_data
             .groupby(by=group)
             [f'{group}_NDCG_k']
             .mean()
