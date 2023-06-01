@@ -2,8 +2,8 @@ import pandas as pd
 
 
 DATA_PATH = 'data/'
-GROUP_SIZES = [5, 6, 7]
-RANDOM_SEEDS = range(len(GROUP_SIZES))
+GROUP_SIZES = [2, 3, 4]
+RANDOM_SEEDS = range(GROUP_SIZES[0], len(GROUP_SIZES) + GROUP_SIZES[0])
 
 
 def split_users_by_groups() -> None:
@@ -30,7 +30,7 @@ def split_users_by_groups() -> None:
             i // group_size for i in range(unique_users.shape[0])
         ]
         
-        unique_users.to_parquet(DATA_PATH + f'groups{group_size}.pq')
+        unique_users.to_parquet(DATA_PATH + f'group{group_size}.pq')
 
     return
 
