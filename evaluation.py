@@ -1,7 +1,6 @@
 from functools import reduce
 import numpy as np
 import pandas as pd
-from sklearn.metrics import ndcg_score
 
 
 def generate_recommendations(make_recommendations, recommender_data, groups_list):

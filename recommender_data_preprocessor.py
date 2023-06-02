@@ -18,6 +18,11 @@ def get_train_test(groups_list):
     return train_data, test_data
 
 
+def get_movies():
+    movies_data = pd.read_parquet(DATA_PATH + 'movies_train.pq')
+    return movies_data
+
+
 def get_unwatched(train_data):
 
     top_popular_movies = (
