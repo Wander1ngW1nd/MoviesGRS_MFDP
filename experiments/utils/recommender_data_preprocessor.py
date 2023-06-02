@@ -3,7 +3,7 @@ import numpy as np
 np.random.seed(42)
 
 
-DATA_PATH = 'data/'
+DATA_PATH = '../data/'
 
 
 def get_train_test(groups_list):
