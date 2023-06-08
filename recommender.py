@@ -126,7 +126,7 @@ class GroupRecommender:
         if self._group_size <= 3:
             unwatched_movies_data: pd.DataFrame = self._movies_data[
                 self._movies_data.movieId.isin(unwatched_movies_ids)
-            ]
+            ].reset_index(drop=True)
             top_movies: np.array = self.get_embedding_based_recommendation(
                 group_ratings, unwatched_movies_data
             )
