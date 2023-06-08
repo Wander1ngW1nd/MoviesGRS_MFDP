@@ -1,6 +1,8 @@
 import pandas as pd
 import streamlit as st
 
+from recommender import GroupRecommender
+
 
 def get_user_ratings(username: str) -> pd.DataFrame:
     with st.form(username):
@@ -26,16 +28,17 @@ def get_user_ratings(username: str) -> pd.DataFrame:
                     """
                 Thanks! Your ratings are saved!\n
                 If you want to add more ratings or correct previous, just submit the form again!\n
+                Your ratings:
                 """
                 )
-                # st.write(user_ratings)
+                st.write(user_ratings)
 
         user_ratings["username"] = username
         user_ratings.set_index(["username", "movie"], inplace=True)
         return user_ratings
 
 
-def get_group_ratings(usernames) -> pd.DataFrame:
+def get_group_ratings(usernames: list[str]) -> pd.DataFrame:
     group_ratings = pd.DataFrame(
         {
             "username": pd.Series(dtype="str"),
@@ -54,12 +57,12 @@ def get_group_ratings(usernames) -> pd.DataFrame:
                     user_ratings,
                 ]
             )
-
+    st.write("Your group ratings:", group_ratings)
     return group_ratings
 
 
 if __name__ == "__main__":
-    movies_data: pd.DataFrame = pd.read_feather("movies.feather")
+    movies_data: pd.DataFrame = pd.read_feather("data/movies.feather")
 
     st.markdown("# Movie Recommender")
 
@@ -67,10 +70,11 @@ if __name__ == "__main__":
         "How many people do you want to get recommendation for?", 1, 7
     )
 
+    recommender = GroupRecommender(num_users)
     usernames = [f"user_{i + 1}" for i in range(num_users)]
 
-    group_ratings = get_group_ratings(usernames)
-
-    if group_ratings.index.unique(level="username").values.shape[0] == len(usernames):
-        st.write(group_ratings)
-        st.button(label="Get recommendations")
+    group_ratings: pd.DataFrame = get_group_ratings(usernames).reset_index()
+    included_users: int = group_ratings.username.unique().shape[0]
+    if included_users == num_users:
+        if st.button(label="Get recommendations"):
+            st.write(recommender.make_recommendation(group_ratings))
