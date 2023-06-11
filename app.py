@@ -7,16 +7,10 @@ from recommender import GroupRecommender
 def get_user_ratings(username: str) -> pd.DataFrame:
     with st.form(username):
         user_ratings: pd.DataFrame = st.data_editor(
-            pd.DataFrame(
-                {"movie": pd.Series(dtype="str"), "rating": pd.Series(dtype="int")}
-            ),
+            pd.DataFrame({"movie": pd.Series(dtype="str"), "rating": pd.Series(dtype="int")}),
             column_config={
-                "movie": st.column_config.SelectboxColumn(
-                    options=movies_data.title, required=True
-                ),
-                "rating": st.column_config.NumberColumn(
-                    min_value=1, max_value=5, required=True
-                ),
+                "movie": st.column_config.SelectboxColumn(options=movies_data.title, required=True),
+                "rating": st.column_config.NumberColumn(min_value=1, max_value=5, required=True),
             },
             num_rows="dynamic",
         )
@@ -38,8 +32,8 @@ def get_user_ratings(username: str) -> pd.DataFrame:
         return user_ratings
 
 
-def get_group_ratings(usernames: list[str]) -> pd.DataFrame:
-    group_ratings = pd.DataFrame(
+def get_group_ratings(users: list[str]) -> pd.DataFrame:
+    ratings = pd.DataFrame(
         {
             "username": pd.Series(dtype="str"),
             "movie": pd.Series(dtype="str"),
@@ -47,18 +41,18 @@ def get_group_ratings(usernames: list[str]) -> pd.DataFrame:
         }
     ).set_index(["username", "movie"])
 
-    tabs = st.tabs(usernames)
-    for i, username in enumerate(usernames):
+    tabs = st.tabs(users)
+    for i, user in enumerate(users):
         with tabs[i]:
-            user_ratings: pd.DataFrame = get_user_ratings(username)
-            group_ratings = pd.concat(
+            user_ratings: pd.DataFrame = get_user_ratings(user)
+            ratings = pd.concat(
                 [
-                    group_ratings[~group_ratings.index.isin(user_ratings.index)],
+                    ratings[~ratings.index.isin(user_ratings.index)],
                     user_ratings,
                 ]
             )
-    st.write("Your group ratings:", group_ratings)
-    return group_ratings
+    st.write("Your group ratings:", ratings)
+    return ratings
 
 
 if __name__ == "__main__":
@@ -66,11 +60,9 @@ if __name__ == "__main__":
 
     st.markdown("# Movie Recommender")
 
-    num_users: int = st.slider(
-        "How many people do you want to get recommendation for?", 1, 7
-    )
+    num_users: int = st.slider("How many people do you want to get recommendation for?", 1, 7)
 
-    recommender = GroupRecommender(num_users)
+    recommender = GroupRecommender(num_users)  # type: ignore [call-arg]
     usernames = [f"user_{i + 1}" for i in range(num_users)]
 
     group_ratings: pd.DataFrame = get_group_ratings(usernames).reset_index()

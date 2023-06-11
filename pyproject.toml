@@ -1,13 +1,65 @@
 [tool.poetry]
 name = "moviesgrs-mfdp"
 version = "0.1.0"
-description = ""
+description = "Group Recommender System developed for My First Data Project"
 authors = ["Danil Islamov <danislamoff@gmail.com>"]
 readme = "README.md"
 packages = [{include = "moviesgrs_mfdp"}]
 
+
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.10,<3.12"
+pandas = "^2.0.2"
+streamlit = "^1.23.1"
+attrs = "^23.1.0"
+numpy = "^1.24.3"
+scipy = "^1.10.1"
+scikit-surprise = "^1.1.3"
+
+
+[tool.poetry.group.linters.dependencies]
+black = "^23.3.0"
+isort = "^5.12.0"
+pylint = "^2.17.4"
+
+
+[tool.poetry.group.typing.dependencies]
+mypy = "^1.3.0"
+
+
+[tool.poetry.group.hooks.dependencies]
+pre-commit = "^3.3.2"
+
+
+[tool.black]
+line-length = 120
+
+
+[tool.isort]
+line_length = 120
+
+
+[tool.mypy]
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+ignore_missing_imports = true
+no_implicit_optional = true
+warn_unreachable = true
+warn_return_any = true
+show_error_context = true
+
+
+[tool.pylint]
+    [tool.pylint.'MESSAGES CONTROL']
+        disable = [
+            'import-error',
+            'missing-module-docstring',
+            'missing-class-docstring',
+            'missing-function-docstring'
+        ]
+
+    [tool.pylint.'FORMAT']
+    max-line-length=120
 
 
 [build-system]
