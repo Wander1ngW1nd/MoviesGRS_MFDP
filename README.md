@@ -76,3 +76,42 @@ For illustration of the steps listed below you can watch [demo](#demo)
 3\. Click **Get recommendation** button on the bottom of the page to get recommendations.
   - **Get recommendation** button will not appear until all the ratings are submitted
   - If your group size ≥ 4, it can take some time (~1 min) to make recommendations
+
+## Development
+
+### Dependencies Management
+
+Project’s dependencies are managed by [poetry](https://python-poetry.org/). So, all the dependencies and configuration parameters are listed in [pyproject.toml](pyproject.toml). 
+
+To install the dependencies, follow these steps:
+
+1\. Install [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [poetry](https://python-poetry.org/docs/#installation)
+
+2\. Clone the project and go to the corresponding directory: 
+
+```bash
+git clone https://github.com/Wander1ngW1nd/MoviesGRS_MFDP
+cd MoviesGRS_MFDP
+```
+
+3\. (Optional) If your python version does not match the requirements specified in [pyproject.toml](pyproject.toml), [install one of the matching versions](https://realpython.com/installing-python)
+
+4\. Create virtual environment and activate it
+
+```bash
+poetry shell
+```
+
+5\. Install dependencies
+Though poetry provides its way for [instaling dependencies](https://python-poetry.org/docs/basic-usage/#installing-dependencies), now it is recommended to use pip installation from [requirements.txt](requirements.txt):
+
+```bash
+pip install -r requirements.txt
+```
+
+> This is motivated by the fact that *scikit-surprise-1.1.3* does not support PEP-517 installation, and poetry native installation would just fail. Due to the same reason, if there are any dependencies that need to be added, it is recommended to add them through poetry add, and then update [requirements.txt](requirements.txt):
+
+```bash
+poetry add <needed_dependency>
+poetry export -f requirements.txt --output requirements.txt
+```
