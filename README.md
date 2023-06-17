@@ -115,3 +115,40 @@ pip install -r requirements.txt
 poetry add <needed_dependency>
 poetry export -f requirements.txt --output requirements.txt
 ```
+
+### Pre-commit Hooks
+
+This project uses pre-commit hooks for code quality checking. For this purpose [https://pre-commit.com](https://pre-commit.com/) framework is utilized.
+
+Now the following linters are used for pre-commit hooks:
+
+- [black](https://black.readthedocs.io/en/latest/)
+- [isort](https://pycqa.github.io/isort/)
+- [mypy](https://mypy.readthedocs.io/en/stable/)
+- [pylint](https://pylint.readthedocs.io/en/latest/index.html)
+
+Their specific configuration details can be found in [pyproject.toml](pyproject.toml).
+
+To initialize pre-commit hooks, you need to execute the following command:
+
+```bash
+pre-commit install
+```
+
+To manually check the staged code base before committing you can run:
+
+```bash
+pre-commit run
+```
+
+If you want to check all files, not only those staged for commit, run:
+
+```bash
+pre-commit run --all-files
+```
+
+To skip some hooks while committing:
+
+```bash
+SKIP=black git commit -m "foo"
+```
