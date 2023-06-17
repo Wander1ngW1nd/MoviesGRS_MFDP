@@ -77,6 +77,42 @@ For illustration of the steps listed below you can watch [demo](#demo)
   - **Get recommendation** button will not appear until all the ratings are submitted
   - If your group size ≥ 4, it can take some time (~1 min) to make recommendations
 
+
+## Under-the-hood description
+
+Application source files are structured as follows:
+
+```
+src
+├── app.py
+├── recommender.py
+└── data
+    ├── history_ratings.feather
+    ├── movies_embeddings.feather
+    └── movies.feather
+```
+
+[app.py](src/app.py) contains front-end part of the application made with [streamlit](https://docs.streamlit.io/). This is the entry-point file of the project. It defines the application interface and performs base users’ input processing. The supposed way of its usage if described in the [corresponding section](#usage). 
+
+[recommender.py](src/recommender.py) contains the GroupRecommender class, generating recommendations based on users’ ratings. It takes the group size on instantiation, as this parameter defines the recommendation algorithm used, by the following way (described in pseudocode):
+
+```python
+if group_size < 4:
+	make_recommendation_based_on_movie_embeddings()
+else:
+	make_recommendations_based_on_svd_decomposition()
+```
+
+So, there are 2 different algorithms. They both firstly represent users and movies in the same vector space, but do it in different ways:
+
+- **Movie-embeddings-based** recommender firstly creates each group member profile. The profile is constructed as the mean of embeddings of movies watched by the user, weighted on their provided ratings. Movies embeddings were precomputed by passing their plots through pretrained `paraphrase-distilroberta-base-v1` from [SentenceTransformers](https://www.sbert.net/index.html) library and saved to [data/movies_embeddings.feather](data/movies_embeddings.feather).
+- **SVD-based recommender** adds group members’ ratings to those stored in [data/history_ratings.feather](data/history_ratings.feather) and performs SVD decomposition of the resulting rating matrix, receiving users’ and movies’ vector representations.
+
+Then both algorithms take the mean of group members’ profiles as the group profile representation, and find top-10 nearest movies in the embeddings space by euclidean distance.
+
+Certain models, parameters and usage conditions choice is described in separate repository, [MoviesGRS_experiments_MFDP](https://github.com/Wander1ngW1nd/MoviesGRS_experiments_MFDP/tree/main).
+
+
 ## Development
 
 ### Dependencies Management
