@@ -11,15 +11,15 @@ from surprise import SVD, Dataset, Reader
 @define(slots=True, auto_attribs=True)
 class GroupRecommender:
     group_size: int
-    _movies_data: pd.DataFrame = field(init=False, default=pd.read_feather("data/movies.feather"))
+    _movies_data: pd.DataFrame = field(init=False, default=pd.read_feather("src/data/movies.feather"))
     _starting_user_id: int = field(
-        init=False, default=pd.read_feather("data/history_ratings.feather").userId.unique().shape[0]
+        init=False, default=pd.read_feather("src/data/history_ratings.feather").userId.unique().shape[0]
     )
     _movies_embeddings: pd.DataFrame = field(init=False)
     _svd: SVD = field(init=False)
 
     def __attrs_post_init__(self) -> None:
-        self._movies_embeddings = pd.read_feather("data/movies_embeddings.feather")
+        self._movies_embeddings = pd.read_feather("src/data/movies_embeddings.feather")
         self._svd = SVD(n_factors=17, n_epochs=30)
 
     def _preprocess_group_ratings(self, group_ratings: pd.DataFrame) -> pd.DataFrame:
@@ -80,7 +80,7 @@ class GroupRecommender:
         return top_movies
 
     def get_svd_based_recommendation(self, group_ratings: pd.DataFrame, unwatched_movies_ids: np.array) -> np.array:
-        train_data: pd.DataFrame = pd.read_feather("data/history_ratings.feather")
+        train_data: pd.DataFrame = pd.read_feather("src/data/history_ratings.feather")
         surprise_train_dataset: surprise.Dataset = Dataset.load_from_df(
             pd.concat([train_data[["userId", "movieId", "rating"]], group_ratings]),
             Reader(rating_scale=(1, 5)),

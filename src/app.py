@@ -56,7 +56,7 @@ def get_group_ratings(users: list[str]) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    movies_data: pd.DataFrame = pd.read_feather("data/movies.feather")
+    movies_data: pd.DataFrame = pd.read_feather("src/data/movies.feather")
 
     st.markdown("# Movie Recommender")
 
