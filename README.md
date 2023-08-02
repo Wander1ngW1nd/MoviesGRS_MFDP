@@ -1,13 +1,13 @@
-<!-- ---
-title: MoviesGRS MFDP
-emoji: 🏃
+---
+title: Movies Group Recommender System
+emoji: 🎬
 colorFrom: purple
 colorTo: purple
 sdk: streamlit
 sdk_version: 1.23.0
 app_file: src/app.py
 pinned: false
---- -->
+---
 
 # Movies Group Recommender System
 
